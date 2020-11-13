@@ -1,0 +1,1 @@
+"dino.c" OPTIMIZE (8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\dino.lst) TABS (2) OBJECT(.\Objects\dino.obj)

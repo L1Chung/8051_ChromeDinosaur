@@ -1,0 +1,233 @@
+C51 COMPILER V9.59.0.0   B                                                                 05/18/2020 16:11:57 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE B
+OBJECT MODULE PLACED IN .\Objects\b.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE b.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\b.lst) 
+                    -TABS(2) OBJECT(.\Objects\b.obj)
+
+line level    source
+
+   1          /************* HJ12864 GLCD Pin definition *************/
+   2          sfr char GLCD_DataPort at P0;
+*** ERROR C141 IN LINE 2 OF b.c: syntax error near 'char', expected '<id>'
+   3          sbit LCD_PSB at  P2.B3;      // =1 to set to parallel mode
+   4          sbit LCD_RS  at  P2.B0;      //Register selection input
+   5          sbit LCD_RW  at  P2.B1;      //The liquid crystal reads/writes the control
+   6          sbit LCD_EN  at  P2.B2;      //The liquid crystal enables the control
+   7          sbit LCD_RST at  P2.B5;      //Liquid crystal replacement port
+   8          
+   9          unsigned char  DIS1[] = {"Mandy Here      "};
+  10          unsigned char  DIS2[] = {"learning 128X64 "};
+  11          unsigned char  DIS3[] = {"& editting the  "};
+  12          unsigned char  DIS4[] = {"source code ! :)"};
+  13          
+  14          
+  15          //Time delay function
+  16          
+  17          void delay(int ms)
+  18          {
+  19              while(ms--)
+  20            {
+  21                unsigned char i;
+  22              for(i=0;i<250;i++)
+*** ERROR C129 IN LINE 22 OF b.c: missing ';' before '<'
+  23               {
+  24                asm nop;
+  25              asm nop;
+  26              asm nop;
+  27              asm nop;
+  28               }
+  29            }
+  30          }
+  31          
+  32          //  Time delay function
+  33          
+  34          void delay1(int ms)
+  35          {
+  36              while(ms--)
+  37            {
+  38                unsigned char y;
+  39              for(y=0;y<100;y++) ;
+  40            }
+  41          }
+  42          
+  43          // inspects the LCD busy condition when
+  44          //lcd_busy is 1, busy, waiting. when lcd-busy is 0, idle,
+  45          //  may write the instruction and the data.
+  46          
+  47          
+  48          unsigned char lcd_busy()
+  49           {
+  50              bit result;
+  51              LCD_RS = 0;
+  52              LCD_RW = 1;
+C51 COMPILER V9.59.0.0   B                                                                 05/18/2020 16:11:57 PAGE 2   
+
+  53              LCD_EN = 1;
+  54              Delay_us(4);
+  55              result = P0 & 0x80;
+  56              LCD_EN = 0;
+  57              return result;
+  58           }
+  59          
+  60          /* writes the instruction data to LCD */
+  61          /*RS=L, RW=L, E= high pulse, D0-D7= instruction-code. */
+  62          
+  63          void lcd_wcmd(unsigned char cmd)
+  64          {
+  65             while(lcd_busy());
+  66              LCD_RS = 0;
+  67              LCD_RW = 0;
+  68              LCD_EN = 0;
+  69              asm nop;
+  70              asm nop;
+  71              P0 = cmd;
+  72              Delay_us(4);
+  73              LCD_EN = 1;
+  74              Delay_us(4);
+  75              LCD_EN = 0;
+  76          }
+  77          
+  78          /* writes the demonstration data to LCD                            */
+  79          /*RS=H, RW=L, E= high pulse, D0-D7= data.                         */
+  80          
+  81          void lcd_wdat(unsigned char dat)
+  82          {
+  83             while(lcd_busy());
+  84              LCD_RS = 1;
+  85              LCD_RW = 0;
+  86              LCD_EN = 0;
+  87              P0 = dat;
+  88              Delay_us(4);
+  89              LCD_EN = 1;
+  90              Delay_us(4);
+  91              LCD_EN = 0;
+  92          }
+  93          /*******************************************************************/
+  94          /*                                                                 */
+  95          /* LCD initialization hypothesis                                                 */
+  96          /*                                                                 */
+  97          /*******************************************************************/
+  98          void lcd_init()
+  99          {
+ 100              LCD_PSB = 1;
+ 101              LCD_RST = 0;   //Liquid crystal replacement
+ 102              delay(3);
+ 103              LCD_RST = 1;
+ 104              delay(3);
+ 105          
+ 106              lcd_wcmd(0x34);      //DL=1 - for 8 bit; RE=1 - expansion operation
+ 107              delay(5);
+ 108              lcd_wcmd(0x02);      //DL=1 - for 8 bit; RE=0 - basic operation
+ 109              delay(5);
+ 110              lcd_wcmd(0x30);      //DL=1 - for 8 bit; RE=0 - basic operation
+ 111              delay(5);
+ 112              lcd_wcmd(0x0F);      //Demonstrated that closes the cursor
+ 113              delay(5);
+ 114              lcd_wcmd(0x01);      //Clear Display
+C51 COMPILER V9.59.0.0   B                                                                 05/18/2020 16:11:57 PAGE 3   
+
+ 115              delay(5);
+ 116          }
+ 117          /*********************************************************/
+ 118          /*                                                       */
+ 119          /* The hypothesis demonstrates the position                                           */
+ 120          /*                                                       */
+ 121          /*********************************************************/
+ 122          void lcd_pos(unsigned char X,unsigned char Y)
+ 123          {
+ 124             unsigned char  pos;
+ 125             if (X==1)
+ 126               {X=0x80;}
+ 127             else if (X==2)
+ 128               {X=0x90;}
+ 129             else if (X==3)
+ 130               {X=0x88;}
+ 131             else if (X==4)
+ 132               {X=0x98;}
+ 133             pos = X+Y ;
+ 134          
+ 135             lcd_wcmd(pos);     //Explicit address
+ 136          }
+ 137          /*********************************************************
+ 138          *                                                        *
+ 139          * Twinkle function                                               *
+ 140          *                                                        *
+ 141          *********************************************************/
+ 142          void lcdflag()
+ 143          {
+ 144             lcd_wcmd(0x08);
+ 145             delay(400);
+ 146             lcd_wcmd(0x0c);
+ 147             delay(400);
+ 148             lcd_wcmd(0x08);
+ 149             delay(400);
+ 150             lcd_wcmd(0x0c);
+ 151             delay(400);
+ 152             lcd_wcmd(0x08);
+ 153             delay(200);
+ 154             lcd_wcmd(0x0c);
+ 155             delay(5);
+ 156             lcd_wcmd(0x01);
+ 157             delay(5);
+ 158          }
+ 159          
+ 160          //  Clear screen function
+ 161          void  clr_screen()
+ 162          {
+ 163             lcd_wcmd(0x34);      //Expansion instruction operation
+ 164             delay(5);
+ 165             lcd_wcmd(0x30);      //Elementary instruction operation
+ 166             delay(5);
+ 167             lcd_wcmd(0x01);      //Clear screen
+ 168             delay(5);
+ 169          }
+ 170          
+ 171          
+ 172          /*********************************************************
+ 173          *                                                        *
+ 174          * Main function                                          *
+ 175          *                                                        *
+ 176          *********************************************************/
+C51 COMPILER V9.59.0.0   B                                                                 05/18/2020 16:11:57 PAGE 4   
+
+ 177          void main()
+ 178          {
+ 179             unsigned char i;
+ 180             delay(100);                 //On the electricity, the waiting is stable
+ 181             lcd_init();                 //Initialization LCD
+ 182             while(1)
+ 183             {
+ 184               lcd_pos(1,0);             //The establishment demonstrates the position for the first line
+ 185               for(i=0;i<16;i++)
+ 186               {
+ 187                 lcd_wdat(DIS1[i]);
+ 188                 delay(30);
+ 189               }
+ 190          
+ 191               lcd_pos(2,0);             //The establishment demonstrates the position for the second line
+ 192               for(i=0;i<16;i++)
+ 193               {
+ 194                 lcd_wdat(DIS2[i]);
+ 195                 delay(30);
+ 196               }
+ 197               lcd_pos(3,0);             //The establishment demonstrates the position for the third line
+ 198               for(i=0;i<16;i++)
+ 199               {
+ 200                 lcd_wdat(DIS3[i]);
+ 201                 delay(30);
+ 202               }
+ 203               lcd_pos(4,0);             //The establishment demonstrates the position for the fourth line
+ 204               for(i=0;i<16;i++)
+ 205               {
+ 206                 lcd_wdat(DIS4[i]);
+ 207                 delay(30);
+ 208               }
+ 209               delay(1000);
+ 210               lcdflag();
+ 211          
+ 212             }
+ 213          }
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  2 ERROR(S)

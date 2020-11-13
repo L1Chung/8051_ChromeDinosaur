@@ -1,0 +1,4 @@
+".\Objects\STARTUP.obj",
+".\Objects\dino.obj" 
+TO ".\Objects\LLC" 
+PRINT(".\Listings\LLC.m51") RAMSIZE(256) 
