@@ -1,4 +1,6 @@
 # Chrome Dinosaur
+School practice homework
+
 AT89S52 connect with 128x64 LCD (ST7920) and 4x4 Membrane keyboard
 
 P0 -> 4x4 keyboard
